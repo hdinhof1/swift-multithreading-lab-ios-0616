@@ -12,6 +12,8 @@ import CoreImage
 
 class ImageViewController : UIViewController, UIScrollViewDelegate {
     
+    var antiqueButton : UIActivityIndicatorView!
+    
     var scrollView: UIScrollView!
     var imageView: UIImageView!
     var activityIndicator: UIActivityIndicatorView!
@@ -19,11 +21,29 @@ class ImageViewController : UIViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
+        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .WhiteLarge)
+        activityIndicator.color = UIColor.cyanColor()
+        activityIndicator.center = view.center
+        view.addSubview(activityIndicator)
+        
     }
     
     @IBAction func antiqueButtonTapped(sender: AnyObject) {
-        filterImage { (result) in
-            result ? print("Image filtering complete") : print("Image filtering did not complete")
+        self.activityIndicator.startAnimating()  // Presents and starts the activity indicator
+        let queue = NSOperationQueue()
+        queue.qualityOfService = .UserInitiated
+        queue.addOperationWithBlock {
+            
+            self.filterImage { (result) in
+                
+                NSOperationQueue.mainQueue().addOperationWithBlock({
+                    self.activityIndicator.stopAnimating()   // Hides and stops the activity indicator
+                    result ? print("Image filtering complete") : print("Image filtering did not complete")
+                    
+                })
+                
+            }
+            
         }
     }
     
@@ -60,8 +80,12 @@ class ImageViewController : UIViewController, UIScrollViewDelegate {
                 UIGraphicsEndImageContext()
                 
                 print("Setting final result")
-                self.imageView?.image = finalResult
-                completion(true)
+                
+                NSOperationQueue.mainQueue().addOperationWithBlock({
+                    self.imageView?.image = finalResult
+                    completion(true)
+                })
+                
             }
         }
     }
