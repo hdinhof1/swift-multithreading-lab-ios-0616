@@ -32,15 +32,14 @@ class ImageViewController : UIViewController, UIScrollViewDelegate {
         self.activityIndicator.startAnimating()  // Presents and starts the activity indicator
         let queue = NSOperationQueue()
         queue.qualityOfService = .UserInitiated
-        queue.addOperationWithBlock {
+        queue.maxConcurrentOperationCount = 2
+        queue.addOperationWithBlock { 
             
             self.filterImage { (result) in
-                
-                NSOperationQueue.mainQueue().addOperationWithBlock({
-                    self.activityIndicator.stopAnimating()   // Hides and stops the activity indicator
+                print("Inside tapped button fn")
+                self.activityIndicator.stopAnimating()   // Hides and stops the activity indicator
                     result ? print("Image filtering complete") : print("Image filtering did not complete")
-                    
-                })
+                
                 
             }
             
@@ -84,6 +83,7 @@ class ImageViewController : UIViewController, UIScrollViewDelegate {
                 NSOperationQueue.mainQueue().addOperationWithBlock({
                     self.imageView?.image = finalResult
                     completion(true)
+                    print("Inside mainqueue call after completion(true) runs last~")
                 })
                 
             }
